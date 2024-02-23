@@ -229,7 +229,7 @@ function sellTickets(queue) {
 function Rectangle(width, height) {
   this.width = width;
   this.height = height;
-  this.getArea = function () {
+  this.getArea = function getArea() {
     return this.width * this.height;
   };
   return this;
@@ -332,8 +332,13 @@ function sortCitiesArray(arr) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  return array.reduce((acc, item) => {
+    const key = keySelector(item);
+    const value = valueSelector(item);
+    acc.set(key, (acc.get(key) || []).concat(value));
+    return acc;
+  }, new Map());
 }
 
 /**
