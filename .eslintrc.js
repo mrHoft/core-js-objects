@@ -21,6 +21,8 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
+    'prefer-object-spread': 'off',
+    'no-return-assign': 'off',
   },
   plugins: ['prettier'],
   noInlineConfig: true,

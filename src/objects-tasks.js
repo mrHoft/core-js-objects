@@ -17,8 +17,8 @@
  *    shallowCopy({a: 2, b: { a: [1, 2, 3]}}) => {a: 2, b: { a: [1, 2, 3]}}
  *    shallowCopy({}) => {}
  */
-function shallowCopy(/* obj */) {
-  throw new Error('Not implemented');
+function shallowCopy(obj) {
+  return Object.assign({}, obj);
 }
 
 /**
@@ -32,8 +32,15 @@ function shallowCopy(/* obj */) {
  *    mergeObjects([{a: 1, b: 2}, {b: 3, c: 5}]) => {a: 1, b: 5, c: 5}
  *    mergeObjects([]) => {}
  */
-function mergeObjects(/* objects */) {
-  throw new Error('Not implemented');
+function mergeObjects(objects) {
+  const res = { ...objects[0] };
+  if (objects[1]) {
+    Object.entries(objects[1]).reduce((acc, [key, val]) => {
+      acc[key] = acc[key] ? acc[key] + val : val;
+      return acc;
+    }, res);
+  }
+  return res;
 }
 
 /**
@@ -49,8 +56,11 @@ function mergeObjects(/* objects */) {
  *    removeProperties({name: 'John', age: 30, city: 'New York'}, 'age') => {name: 'John', city: 'New York'}
  *
  */
-function removeProperties(/* obj, keys */) {
-  throw new Error('Not implemented');
+function removeProperties(obj, keys) {
+  const res = { ...obj };
+  if (Array.isArray(keys)) keys.forEach((key) => delete res[key]);
+  else if (typeof keys === 'string') delete res[keys];
+  return res;
 }
 
 /**
@@ -65,8 +75,10 @@ function removeProperties(/* obj, keys */) {
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 2}) => true
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 3}) => false
  */
-function compareObjects(/* obj1, obj2 */) {
-  throw new Error('Not implemented');
+function compareObjects(obj1, obj2) {
+  const [keys1, keys2] = [Object.keys(obj1), Object.keys(obj2)];
+  if (keys1.length !== keys2.length) return false;
+  return keys1.every((key) => obj1[key] === obj2[key]);
 }
 
 /**
@@ -80,8 +92,8 @@ function compareObjects(/* obj1, obj2 */) {
  *    isEmptyObject({}) => true
  *    isEmptyObject({a: 1}) => false
  */
-function isEmptyObject(/* obj */) {
-  throw new Error('Not implemented');
+function isEmptyObject(obj) {
+  return Object.keys(obj).length === 0;
 }
 
 /**
@@ -100,8 +112,8 @@ function isEmptyObject(/* obj */) {
  *    immutableObj.newProp = 'new';
  *    console.log(immutableObj) => {a: 1, b: 2}
  */
-function makeImmutable(/* obj */) {
-  throw new Error('Not implemented');
+function makeImmutable(obj) {
+  return Object.freeze(obj);
 }
 
 /**
@@ -114,8 +126,13 @@ function makeImmutable(/* obj */) {
  *    makeWord({ a: [0, 1], b: [2, 3], c: [4, 5] }) => 'aabbcc'
  *    makeWord({ H:[0], e: [1], l: [2, 3, 8], o: [4, 6], W:[5], r:[7], d:[9]}) => 'HelloWorld'
  */
-function makeWord(/* lettersObject */) {
-  throw new Error('Not implemented');
+function makeWord(obj) {
+  return Object.keys(obj)
+    .reduce((acc, key) => {
+      obj[key].forEach((n) => (acc[n] = key));
+      return acc;
+    }, [])
+    .join('');
 }
 
 /**
@@ -132,8 +149,57 @@ function makeWord(/* lettersObject */) {
  *    sellTickets([25, 25, 50]) => true
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
-function sellTickets(/* queue */) {
-  throw new Error('Not implemented');
+function sellTickets(queue) {
+  const bills = [];
+
+  const canSell = (change) => {
+    switch (change) {
+      case 0:
+        return true;
+      case 25: {
+        const i = bills.indexOf(25);
+        if (i !== -1) {
+          bills[i] = 0;
+          return true;
+        }
+        break;
+      }
+      case 50: {
+        let i = bills.indexOf(50);
+        if (i !== -1) {
+          bills[i] = 0;
+          return true;
+        }
+        i = bills.indexOf(25);
+        if (i !== -1) {
+          bills[i] = 0;
+          return canSell(25);
+        }
+        break;
+      }
+      case 75: {
+        let i = bills.indexOf(50);
+        if (i !== -1) {
+          bills[i] = 0;
+          return canSell(25);
+        }
+        i = bills.indexOf(25);
+        if (i !== -1) {
+          bills[i] = 0;
+          return canSell(50);
+        }
+        break;
+      }
+      default:
+        return false;
+    }
+    return false;
+  };
+
+  return queue.every((bill) => {
+    bills.push(bill);
+    return canSell(bill - 25);
+  });
 }
 
 /**
