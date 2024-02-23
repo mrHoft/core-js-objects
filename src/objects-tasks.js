@@ -18,7 +18,8 @@
  *    shallowCopy({}) => {}
  */
 function shallowCopy(obj) {
-  return Object.assign({}, obj);
+  const res = {};
+  return Object.assign(res, obj);
 }
 
 /**
@@ -129,7 +130,9 @@ function makeImmutable(obj) {
 function makeWord(obj) {
   return Object.keys(obj)
     .reduce((acc, key) => {
-      obj[key].forEach((n) => (acc[n] = key));
+      obj[key].forEach((n) => {
+        acc[n] = key;
+      });
       return acc;
     }, [])
     .join('');
