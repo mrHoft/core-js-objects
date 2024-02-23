@@ -395,33 +395,70 @@ function group(array, keySelector, valueSelector) {
  *  For more examples see unit tests.
  */
 
+const SELECTOR = {
+  element: 1,
+  id: 2,
+  class: 3,
+  attr: 4,
+  pseudo: 5,
+  pseudoEl: 6,
+};
+const ALONE = [1, 2, 6];
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  css: [],
+  selectors: [],
+
+  resolve(value, selector) {
+    if (ALONE.includes(selector) && this.selectors.includes(selector)) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    if (this.selectors.some((el) => el > selector)) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+
+    const obj = { ...this };
+    obj.selectors = this.selectors.concat(selector);
+    obj.css = this.css.concat(value);
+    return obj;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return this.resolve(value, SELECTOR.element);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return this.resolve(`#${value}`, SELECTOR.id);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return this.resolve(`.${value}`, SELECTOR.class);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return this.resolve(`[${value}]`, SELECTOR.attr);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return this.resolve(`:${value}`, SELECTOR.pseudo);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return this.resolve(`::${value}`, SELECTOR.pseudoEl);
+  },
+
+  combine(selector1, combinator, selector2) {
+    const obj = { ...this };
+    obj.css = selector1.css.concat(` ${combinator} `).concat(selector2.css);
+    return obj;
+  },
+
+  stringify() {
+    return this.css.join('');
   },
 };
 
